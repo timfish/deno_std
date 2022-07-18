@@ -103,16 +103,13 @@ export function debuglog(
   return logger;
 }
 
-let debugEnv;
-try {
-  debugEnv = Deno.env.get("NODE_DEBUG") ?? "";
-} catch (error) {
-  if (error instanceof Deno.errors.PermissionDenied) {
-    debugEnv = "";
-  } else {
-    throw error;
-  }
+const status = await Deno.permissions.query({
+  name: "env",
+  variable: "NODE_DEBUG",
+});
+
+if (status.state == "granted") {
+  initializeDebugEnv(Deno.env.get("NODE_DEBUG") ?? "");
 }
-initializeDebugEnv(debugEnv);
 
 export default { debuglog };
